@@ -4,6 +4,14 @@ option java_multiple_files = true;
 option java_package = "atm";
 option java_outer_classname = "ATMServerProto";
 
+message LoginRequest {
+	uint32 account_num = 1;
+	uint32 pin = 2;
+}
+
+message LoginToken {
+	int64 token = 1;
+}
 
 message PingRequest {
 }
@@ -13,4 +21,6 @@ message PingResponse {
 
 service ATMServer {
 	rpc ping(PingRequest) returns (PingResponse) {}
+
+	rpc login(LoginRequest) returns (LoginToken) {}
 }

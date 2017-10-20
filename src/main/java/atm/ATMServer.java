@@ -4,8 +4,12 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import atm.LoginToken.Builder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.Status;
+import io.grpc.StatusException;
+import io.grpc.StatusRuntimeException;
 
 public class ATMServer {
 	private static final Logger logger = Logger.getLogger(ATMServer.class.getName());
@@ -64,6 +68,35 @@ public class ATMServer {
 			PingResponse reply = PingResponse.newBuilder().build();
 			responseObserver.onNext(reply);
 			responseObserver.onCompleted();
+		}
+		
+		@Override
+		public void login(atm.LoginRequest request, io.grpc.stub.StreamObserver<atm.LoginToken> responseObserver) {
+			int account_num = request.getAccountNum();
+			int pin = request.getPin();
+			
+			long loginToken = 0;
+			
+			// Valid accounts:
+			//    1234 (pin 5555)
+			//    9876 (pin 1122)
+			
+			if (account_num == 1234 && pin == 5555) {
+				loginToken = 1;
+				LoginToken reply = LoginToken.newBuilder().setToken(loginToken).build();
+				responseObserver.onNext(reply);
+				responseObserver.onCompleted();
+				
+			} else if (account_num == 9876 && pin == 1122) {
+				loginToken = 2;
+				LoginToken reply = LoginToken.newBuilder().setToken(loginToken).build();
+				responseObserver.onNext(reply);
+				responseObserver.onCompleted();
+				
+			} else {
+				StatusRuntimeException e = new StatusRuntimeException(Status.INVALID_ARGUMENT.withDescription("No such account number"));
+				responseObserver.onError(e);
+			}
 		}
 	}
 

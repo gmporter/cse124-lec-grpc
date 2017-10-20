@@ -2,10 +2,14 @@ package atm;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Status;
+import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import atm.LoginRequest.Builder;
 
 /**
  * A simple client that requests a greeting from the {@link HelloWorldServer}.
@@ -53,6 +57,24 @@ public class ATMClient {
 		}
 		logger.info("Server is up!");
 	}
+	
+	/** Login to the server **/
+	public void login(int acctnum, int pin) {
+		logger.info("Logging into the server with account " + acctnum + " and pin " + pin);
+		Builder reqBuilder = LoginRequest.newBuilder();
+		reqBuilder.setAccountNum(acctnum);
+		reqBuilder.setPin(pin);
+		LoginRequest req = reqBuilder.build();
+		
+		try {
+			LoginToken tok = blockingStub.login(req);
+			logger.info("Got a login token of " + tok.getToken());
+			
+		} catch (StatusRuntimeException e) {
+			logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
+			logger.log(Level.WARNING, "Reason: " + e.getStatus().getDescription());
+		}
+	}
 
 	public static void main(String[] args) throws Exception {
 		if (args.length != 2) {
@@ -66,6 +88,8 @@ public class ATMClient {
 		ATMClient client = new ATMClient(host, port);
 		try {
 			client.testConnectivity();
+			client.login(1234, 5555);
+			client.login(1234, 212);
 		} finally {
 			client.shutdown();
 		}
