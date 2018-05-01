@@ -6,7 +6,7 @@ George Porter (gmporter@cs.ucsd.edu)
 
 ## To build the protocol buffer IDL into auto-generated stubs:
 
-$ mvn protobuf:compile
+$ mvn protobuf:compile protobuf:compile-custom
 
 ## To build the code:
 
